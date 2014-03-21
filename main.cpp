@@ -1,0 +1,174 @@
+/*************************
+* Edward Alvarez Mercedes
+* Ryan Flynn
+* ISTE-101
+* Project 2
+* File Server
+**************************/
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cstdlib>
+#include "Winsock2.h"
+#include <dirent.h>
+#include "Socket.h"
+
+using namespace std;
+
+void getFolderContents(Socket&);
+bool checkName(string, string);
+void sendFile(string, Socket&);
+void checkMsg(char*, Socket&);
+
+int main(int argc, char * argv[])
+{
+
+    int port = 54321;
+    //char *ipAddress = "127.0.0.1";
+    string ipAddress;
+    string id = "user";
+    bool connected = true;
+    bool done = false;
+    char recMessage[STRLEN];
+    char sendMessage[STRLEN];
+
+        //Server
+        ServerSocket sockServer;
+        cout<<"Server started..."<<endl;
+        sockServer.StartHosting( port );
+
+        //while ( true )
+        //{
+
+        sockServer.SendData("LOGIN");
+        sockServer.RecvData( recMessage, STRLEN );
+
+            if(checkName(recMessage, id) == false){
+                cerr << "Invalid User ID!" << endl;
+                sockServer.SendData("UNWELCOME");
+                sockServer.CloseConnection();
+
+            }else{
+                sockServer.SendData("WELCOME");
+
+                while(!done){
+                    sockServer.RecvData( recMessage, STRLEN );
+                    cout<<"Received: > "<<recMessage<<endl;
+
+                        if ( strcmp( recMessage, "QUIT")==0 ){
+                            sockServer.CloseConnection();
+                            done = true;
+                        }else{
+                            checkMsg(recMessage, sockServer);
+                        }
+                }
+
+            }
+
+        //}
+
+    return 0;
+}
+
+
+/********************
+* Name: checkName
+* Purpose: Verify user login
+* Arguments: required name, user name
+* Returns: true if matched, false otherwise
+********************/
+bool checkName(string name, string user){
+    if(name == user){
+        return true;
+    }else{
+        return false;
+    }
+}
+
+/********************
+* Name: checkMsg
+* Purpose: Parse message
+*    and execute operations
+* Arguments: message and socket ptr
+* Returns: nothing
+********************/
+void checkMsg(char* recMessage, Socket& sockServer){
+
+ if ( strncmp( recMessage, "LIST", 4 )==0){
+
+            getFolderContents(sockServer);
+
+        }
+    else if ( strncmp( recMessage, "SEND", 4 )==0){
+
+
+        }
+    else if ( strncmp( recMessage, "EOF OK", 6 )==0){
+
+        cout << "File Transmitted Successfully." << endl;
+        sockServer.SendData("OK");
+
+        }
+    else{
+        sockServer.SendData("ERROR");
+    }
+
+}
+/********************
+* Name: getFolderContents
+* Purpose: reads file contents
+*     of program directory and sends
+*     a list of file to the client
+* Arguments: none
+* Returns: nothing
+********************/
+void getFolderContents(Socket& sockServer){
+        char dirList [STRLEN];
+        char num [STRLEN];
+        char newline [2];
+        char space [2];
+        newline[0]='\n';
+        newline[1]='\0';
+        space[0]=' ';
+        space[1]='\0';
+
+        DIR *pdir = NULL; // remember, it's good practice to initialise a pointer to NULL!
+	    pdir = opendir ("."); // "." will refer to the current directory
+	    struct dirent *pent = NULL;
+
+	    if (pdir == NULL) // if pdir wasn't initialised correctly
+	    { // print an error message and exit the program
+	        cerr << "Error: Directory could not be initialized correctly." <<endl;
+	        exit (3);
+	    } // end if
+
+
+	    while (pent = readdir (pdir)) // while there is still something in the directory to list
+        {
+	        if (pent == NULL) // if pent has not been initialised correctly
+	        { // print an error message, and exit the program
+	            cerr << "Error: Directory could not be initialized correctly." <<endl;
+                exit (4);
+	        }
+	        int i = 1;
+	        // otherwise, it was initialized correctly. Let's print it on the console:
+	        strcat(dirList, itoa(i,num,10));
+	        strcat(dirList, space);
+	        strcat(dirList,pent->d_name);
+	        strcat(dirList, newline);
+
+	        i++;
+	    }
+        sockServer.SendData(dirList);
+	    // finally, let's close the directory
+	    closedir (pdir);
+}
+/********************
+*
+*
+*
+********************/
+void sendFile(string file, Socket& sockServer){
+
+
+}
