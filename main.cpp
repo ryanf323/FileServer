@@ -17,20 +17,19 @@ using namespace std;
 
 void getFolderContents(Socket&);
 bool checkName(string, string);
-void sendFile(string, Socket&);
+void getFile(char*, Socket&);
 void checkMsg(char*, Socket&);
+char* stringToCharArray(string);
 
 int main(int argc, char * argv[])
 {
 
     int port = 54321;
-    //char *ipAddress = "127.0.0.1";
     string ipAddress;
     string id = "user";
-    bool connected = true;
     bool done = false;
     char recMessage[STRLEN];
-    char sendMessage[STRLEN];
+    //char sendMessage[STRLEN];
 
         //Server
         ServerSocket sockServer;
@@ -39,7 +38,7 @@ int main(int argc, char * argv[])
 
         //while ( true )
         //{
-
+        cout << "Prompting for login..." <<endl;
         sockServer.SendData("LOGIN");
         sockServer.RecvData( recMessage, STRLEN );
 
@@ -78,6 +77,7 @@ int main(int argc, char * argv[])
 * Returns: true if matched, false otherwise
 ********************/
 bool checkName(string name, string user){
+
     if(name == user){
         return true;
     }else{
@@ -101,6 +101,7 @@ void checkMsg(char* recMessage, Socket& sockServer){
         }
     else if ( strncmp( recMessage, "SEND", 4 )==0){
 
+            getFile(recMessage, sockServer);
 
         }
     else if ( strncmp( recMessage, "EOF OK", 6 )==0){
@@ -110,7 +111,9 @@ void checkMsg(char* recMessage, Socket& sockServer){
 
         }
     else{
+
         sockServer.SendData("ERROR");
+
     }
 
 }
@@ -119,7 +122,7 @@ void checkMsg(char* recMessage, Socket& sockServer){
 * Purpose: reads file contents
 *     of program directory and sends
 *     a list of file to the client
-* Arguments: none
+* Arguments: socket
 * Returns: nothing
 ********************/
 void getFolderContents(Socket& sockServer){
@@ -129,29 +132,30 @@ void getFolderContents(Socket& sockServer){
         char space [2];
         newline[0]='\n';
         newline[1]='\0';
-        space[0]=' ';
+        space[0]='\t';
         space[1]='\0';
 
-        DIR *pdir = NULL; // remember, it's good practice to initialise a pointer to NULL!
+        strcat(dirList, newline);
+        DIR *pdir = NULL; // remember, it's good practice to initialize a pointer to NULL!
 	    pdir = opendir ("."); // "." will refer to the current directory
 	    struct dirent *pent = NULL;
 
-	    if (pdir == NULL) // if pdir wasn't initialised correctly
+	    if (pdir == NULL) // if pdir wasn't initialized correctly
 	    { // print an error message and exit the program
 	        cerr << "Error: Directory could not be initialized correctly." <<endl;
 	        exit (3);
 	    } // end if
 
-
+        int i = 1;
 	    while (pent = readdir (pdir)) // while there is still something in the directory to list
         {
-	        if (pent == NULL) // if pent has not been initialised correctly
+	        if (pent == NULL) // if pent has not been initialized correctly
 	        { // print an error message, and exit the program
 	            cerr << "Error: Directory could not be initialized correctly." <<endl;
                 exit (4);
 	        }
-	        int i = 1;
-	        // otherwise, it was initialized correctly. Let's print it on the console:
+
+	        //Build String with Folder Contents
 	        strcat(dirList, itoa(i,num,10));
 	        strcat(dirList, space);
 	        strcat(dirList,pent->d_name);
@@ -168,7 +172,59 @@ void getFolderContents(Socket& sockServer){
 *
 *
 ********************/
-void sendFile(string file, Socket& sockServer){
+void getFile(char *message, Socket& sockServer){
+
+        //parse SEND message for file number
+       string toParse(message);
+       string fileName;
+       vector<string> dirContents;
+       int space = toParse.find(' ');
+       int fileNum;
+
+       if (space == -1){
+            cerr << "Invalid File Request" << endl;
+       }else{
+           string number = toParse.substr((space+1), toParse.length()-space+1);
+            fileNum = atoi(number.c_str());
+            cout << "File Number "<< fileNum << "Requested." << endl;
+       }
+       char num [STRLEN];
 
 
+        DIR *pdir = NULL;
+	    pdir = opendir ("."); // "." current directory
+	    struct dirent *pent = NULL;
+
+	    if (pdir == NULL) // if pdir wasn't initialized correctly
+	    { // print an error message and exit the program
+	        cerr << "Error: Directory could not be initialized correctly." <<endl;
+	        exit (3);
+	    } // end if
+
+        while (pent = readdir(pdir)) // while there is still something in the directory to list
+        {
+	        if (pent == NULL) // if pent has not been initialized correctly
+	        { // print an error message, and exit the program
+	            cerr << "Error: Directory could not be initialized correctly." <<endl;
+                exit (4);
+	        }
+
+	        dirContents.push_back(pent->d_name);
+
+	    }
+	    closedir (pdir);
+
+        fileName = dirContents[fileNum-1];
+
+        //send file
+
+        sockServer.SendFile(stringToCharArray(fileName));
+
+}
+
+char* stringToCharArray(string oldStr){
+    char *newCStr = new char[oldStr.size()+1];
+    strcpy(newCStr, oldStr.c_str());
+
+    return newCStr;
 }

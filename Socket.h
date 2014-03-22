@@ -23,7 +23,8 @@ class Socket
         bool RecvData( char*, int );
         void CloseConnection();
         void GetAndSendMessage();
-
+        void SendFile(char *fpath);
+        void ReceiveFile(char *filename);
 
 };
 
@@ -33,14 +34,14 @@ class ServerSocket : public Socket
         void Listen();
         void Bind( int port );
         void StartHosting( int port );
-        void fileSend(char *fpath);
+
 };
 
 class ClientSocket : public Socket
 {
     public:
         void ConnectToServer( const char *ipAddress, int port );
-        void fileReceive(char *filename);
+
 };
 
 

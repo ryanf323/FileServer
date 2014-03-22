@@ -139,8 +139,9 @@ void ClientSocket::ConnectToServer( const char *ipAddress, int port )
         exit(13);
     }
 }
-void ClientSocket::fileReceive(char *filename)
+void Socket::ReceiveFile(char *filename)
 {
+
 	char rec[50] = "";
 
 	recv( mySocket, filename, 32, 0 );
@@ -178,15 +179,8 @@ void ClientSocket::fileReceive(char *filename)
 
 }
 
-void ServerSocket::fileSend(char *fpath)
+void Socket::SendFile( char *fpath)
 {
-
-	// Extract only filename from given path.
-	char filename[50];
-	int i=strlen(fpath);
-	for(;i>0;i--)if(fpath[i-1]=='\\')break;
-	for(int j=0;i<=(int)strlen(fpath);i++)filename[j++]=fpath[i];
-	////////////////////////////////////////
 
 	ifstream myFile (fpath, ios::in|ios::binary|ios::ate);
 	int size = (int)myFile.tellg();
@@ -195,11 +189,12 @@ void ServerSocket::fileSend(char *fpath)
 	char filesize[10];itoa(size,filesize,10);
 
 
-	send( mySocket, filename, strlen(filename), 0 );
-	char rec[32] = "";recv( mySocket, rec, 32, 0 );
+	this->SendData(fpath);
+	char rec[32] = "";
+	this->RecvData(rec,32);
 
-	send( mySocket, filesize, strlen(filesize), 0 );
-	recv( mySocket, rec, 32, 0 );
+    this->SendData(filesize);
+	this->RecvData(rec,32);
 
 
 	FILE *fr = fopen(fpath, "rb");
@@ -212,6 +207,7 @@ void ServerSocket::fileSend(char *fpath)
 		{
 			fread(buffer, 1024, 1, fr);
 			send( mySocket, buffer, 1024, 0 );
+
 			recv( mySocket, rec, 32, 0 );
 
 		}
@@ -228,6 +224,7 @@ void ServerSocket::fileSend(char *fpath)
 	}
 
 	fclose(fr);
+
 
 }
 

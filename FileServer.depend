@@ -16,3 +16,20 @@
 	<dirent.h>
 	"Socket.h"
 
+1395534291 source:c:\users\ryan flynn\documents\github\fileserver\fileserver\socket.cpp
+	"Socket.h"
+
+1395534291 c:\users\ryan flynn\documents\github\fileserver\fileserver\socket.h
+	<iostream>
+	<fstream>
+	"WinSock2.h"
+
+1395534367 source:c:\users\ryan flynn\documents\github\fileserver\fileserver\main.cpp
+	<iostream>
+	<vector>
+	<string>
+	<cstdlib>
+	"Winsock2.h"
+	<dirent.h>
+	"Socket.h"
+
