@@ -29,26 +29,26 @@ int main(int argc, char * argv[])
     string id = "user";
     bool done = false;
     char recMessage[STRLEN];
-    //char sendMessage[STRLEN];
 
         //Server
         ServerSocket sockServer;
         cout<<"Server started..."<<endl;
         sockServer.StartHosting( port );
 
-        //while ( true )
-        //{
+        while ( true )
+        {
         cout << "Prompting for login..." <<endl;
-        sockServer.SendData("LOGIN");
+        sockServer.SendData(stringToCharArray("LOGIN"));
         sockServer.RecvData( recMessage, STRLEN );
 
             if(checkName(recMessage, id) == false){
                 cerr << "Invalid User ID!" << endl;
-                sockServer.SendData("UNWELCOME");
+                sockServer.SendData(stringToCharArray("UNWELCOME"));
                 sockServer.CloseConnection();
+                sockServer.Listen();
 
             }else{
-                sockServer.SendData("WELCOME");
+                sockServer.SendData(stringToCharArray("WELCOME"));
 
                 while(!done){
                     sockServer.RecvData( recMessage, STRLEN );
@@ -56,6 +56,7 @@ int main(int argc, char * argv[])
 
                         if ( strcmp( recMessage, "QUIT")==0 ){
                             sockServer.CloseConnection();
+                            sockServer.Listen();
                             done = true;
                         }else{
                             checkMsg(recMessage, sockServer);
@@ -64,7 +65,7 @@ int main(int argc, char * argv[])
 
             }
 
-        //}
+        }
 
     return 0;
 }
@@ -107,12 +108,12 @@ void checkMsg(char* recMessage, Socket& sockServer){
     else if ( strncmp( recMessage, "EOF OK", 6 )==0){
 
         cout << "File Transmitted Successfully." << endl;
-        sockServer.SendData("OK");
+        sockServer.SendData(stringToCharArray("OK"));
 
         }
     else{
 
-        sockServer.SendData("ERROR");
+        sockServer.SendData(stringToCharArray("ERROR"));
 
     }
 
@@ -168,9 +169,12 @@ void getFolderContents(Socket& sockServer){
 	    closedir (pdir);
 }
 /********************
-*
-*
-*
+* Name: getFile
+* Purpose: fetches file name
+*  and passes it to the send
+*  method
+* Arguments: filename, socket
+* Returns: nothing
 ********************/
 void getFile(char *message, Socket& sockServer){
 
@@ -188,23 +192,21 @@ void getFile(char *message, Socket& sockServer){
             fileNum = atoi(number.c_str());
             cout << "File Number "<< fileNum << "Requested." << endl;
        }
-       char num [STRLEN];
-
 
         DIR *pdir = NULL;
 	    pdir = opendir ("."); // "." current directory
 	    struct dirent *pent = NULL;
 
-	    if (pdir == NULL) // if pdir wasn't initialized correctly
-	    { // print an error message and exit the program
+	    if (pdir == NULL)
+	    {
 	        cerr << "Error: Directory could not be initialized correctly." <<endl;
 	        exit (3);
-	    } // end if
+	    }
 
         while (pent = readdir(pdir)) // while there is still something in the directory to list
         {
-	        if (pent == NULL) // if pent has not been initialized correctly
-	        { // print an error message, and exit the program
+	        if (pent == NULL)
+            {
 	            cerr << "Error: Directory could not be initialized correctly." <<endl;
                 exit (4);
 	        }
@@ -213,16 +215,17 @@ void getFile(char *message, Socket& sockServer){
 
 	    }
 	    closedir (pdir);
-
         fileName = dirContents[fileNum-1];
 
         //send file
 
         sockServer.SendFile(stringToCharArray(fileName));
+        sockServer.SendData(stringToCharArray("EOFEOFEOFEOFEOFEOF"));
 
 }
 
 char* stringToCharArray(string oldStr){
+
     char *newCStr = new char[oldStr.size()+1];
     strcpy(newCStr, oldStr.c_str());
 
