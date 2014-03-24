@@ -136,7 +136,7 @@ void getFolderContents(Socket& sockServer){
         space[0]='\t';
         space[1]='\0';
 
-        strcat(dirList, newline);
+        //strcat(dirList, newline);
         DIR *pdir = NULL; // remember, it's good practice to initialize a pointer to NULL!
 	    pdir = opendir ("."); // "." will refer to the current directory
 	    struct dirent *pent = NULL;
@@ -167,6 +167,9 @@ void getFolderContents(Socket& sockServer){
         sockServer.SendData(dirList);
 	    // finally, let's close the directory
 	    closedir (pdir);
+
+	     for (int i=0; i<STRLEN; i++)
+            dirList[i]=NULL;
 }
 /********************
 * Name: getFile
@@ -215,13 +218,21 @@ void getFile(char *message, Socket& sockServer){
 
 	    }
 	    closedir (pdir);
-        fileName = dirContents[fileNum-1];
 
-        //send file
+	    //Check for number in Range!
+	    if(fileNum < 0 || fileNum > dirContents.size() -1){
 
-        sockServer.SendFile(stringToCharArray(fileName));
-        sockServer.SendData(stringToCharArray("EOFEOFEOFEOFEOFEOF"));
+          sockServer.SendData(stringToCharArray("ERROR"));
 
+	    }else{
+
+            fileName = dirContents[fileNum-1];
+
+            //send file
+
+            sockServer.SendFile(stringToCharArray(fileName));
+            sockServer.SendData(stringToCharArray("EOFEOFEOFEOFEOFEOF"));
+	    }
 }
 
 char* stringToCharArray(string oldStr){
