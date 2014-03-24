@@ -170,10 +170,12 @@ void getFolderContents(Socket& sockServer){
 	    }
 
         sockServer.SendData(dirList);
+        closedir (pdir);
+
+        for (int i=0; i<STRLEN; i++)
+            dirList[i]=NULL;
 
 	    // finally, let's close the directory
-	    closedir (pdir);
-
 }
 /********************
 * Name: getFile
