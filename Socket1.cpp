@@ -141,10 +141,12 @@ void ClientSocket::ConnectToServer( const char *ipAddress, int port )
 }
 void Socket::ReceiveFile(char *filename)
 {
-
 	char rec[50] = "";
+	//recv( mySocket, filename, 32, 0 );
+	//New code:
+	int i = recv( mySocket, filename, 256, 0 );
+	filename[i]='\0';
 
-	recv( mySocket, filename, 32, 0 );
 	send( mySocket, "OK", strlen("OK"), 0 );
 
 	FILE *fw = fopen(filename, "wb");
@@ -183,7 +185,7 @@ void Socket::SendFile( char *fpath)
 {
 
 	ifstream myFile (fpath, ios::in|ios::binary|ios::ate);
-	int size = (int)myFile.tellg(); //File's size.
+	int size = (int)myFile.tellg();
 	myFile.close();
 
 	char filesize[10];itoa(size,filesize,10);
@@ -205,7 +207,6 @@ void Socket::SendFile( char *fpath)
 		{
 			fread(buffer, 1024, 1, fr);
 			send( mySocket, buffer, 1024, 0 );
-
 			recv( mySocket, rec, 32, 0 );
 
 		}
@@ -222,12 +223,5 @@ void Socket::SendFile( char *fpath)
 	}
 
 	fclose(fr);
-
-
 }
-
-
-
-
-
 

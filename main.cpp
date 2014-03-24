@@ -56,7 +56,9 @@ int main(int argc, char * argv[])
 
                         if ( strcmp( recMessage, "QUIT")==0 ){
                             sockServer.CloseConnection();
-                            sockServer.Listen();
+                            cout << "Connection closed. Exiting the program" << endl; //New
+                            //sockServer.Listen();
+                            return 0; //New
                             done = true;
                         }else{
                             checkMsg(recMessage, sockServer);
@@ -112,9 +114,7 @@ void checkMsg(char* recMessage, Socket& sockServer){
 
         }
     else{
-
         sockServer.SendData(stringToCharArray("ERROR"));
-
     }
 
 }
@@ -136,6 +136,7 @@ void getFolderContents(Socket& sockServer){
         space[0]='\t';
         space[1]='\0';
 
+
         strcat(dirList, newline);
         DIR *pdir = NULL; // remember, it's good practice to initialize a pointer to NULL!
 	    pdir = opendir ("."); // "." will refer to the current directory
@@ -148,6 +149,7 @@ void getFolderContents(Socket& sockServer){
 	    } // end if
 
         int i = 1;
+
 	    while (pent = readdir (pdir)) // while there is still something in the directory to list
         {
 	        if (pent == NULL) // if pent has not been initialized correctly
@@ -157,16 +159,23 @@ void getFolderContents(Socket& sockServer){
 	        }
 
 	        //Build String with Folder Contents
+
 	        strcat(dirList, itoa(i,num,10));
 	        strcat(dirList, space);
 	        strcat(dirList,pent->d_name);
 	        strcat(dirList, newline);
 
+
 	        i++;
 	    }
+
         sockServer.SendData(dirList);
+        closedir (pdir);
+
+        for (int i=0; i<STRLEN; i++)
+            dirList[i]=NULL;
+
 	    // finally, let's close the directory
-	    closedir (pdir);
 }
 /********************
 * Name: getFile
@@ -218,7 +227,6 @@ void getFile(char *message, Socket& sockServer){
         fileName = dirContents[fileNum-1];
 
         //send file
-
         sockServer.SendFile(stringToCharArray(fileName));
         sockServer.SendData(stringToCharArray("EOFEOFEOFEOFEOFEOF"));
 
