@@ -33,3 +33,37 @@
 	<dirent.h>
 	"Socket.h"
 
+1395757122 source:c:\users\edward\desktop\project 2 version final ryan\fileserver-master\fileserver-master\main.cpp
+	<iostream>
+	<vector>
+	<string>
+	<cstdlib>
+	"Winsock2.h"
+	<dirent.h>
+	"Socket.h"
+
+1395703252 c:\users\edward\desktop\project 2 version final ryan\fileserver-master\fileserver-master\socket.h
+	<iostream>
+	<fstream>
+	"WinSock2.h"
+
+1395703252 source:c:\users\edward\desktop\project 2 version final ryan\fileserver-master\fileserver-master\socket.cpp
+	"Socket.h"
+
+1395703252 source:c:\users\ryan flynn\desktop\fileserver-master\socket.cpp
+	"Socket.h"
+
+1395703252 c:\users\ryan flynn\desktop\fileserver-master\socket.h
+	<iostream>
+	<fstream>
+	"WinSock2.h"
+
+1395769274 source:c:\users\ryan flynn\desktop\fileserver-master\main.cpp
+	<iostream>
+	<vector>
+	<string>
+	<cstdlib>
+	"Winsock2.h"
+	<dirent.h>
+	"Socket.h"
+

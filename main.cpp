@@ -23,7 +23,7 @@ char* stringToCharArray(string);
 
 int main(int argc, char * argv[])
 {
-
+    //Variables initialization:
     int port = 54321;
     string ipAddress;
     string id = "user";
@@ -37,17 +37,19 @@ int main(int argc, char * argv[])
 
         while ( true )
         {
+        //Protocol to initiate communication with the client:
         cout << "Prompting for login..." <<endl;
         sockServer.SendData(stringToCharArray("LOGIN"));
         sockServer.RecvData( recMessage, STRLEN );
 
             if(checkName(recMessage, id) == false){
-                cerr << "Invalid User ID!" << endl;
+                cerr << "Invalid User ID: '" << recMessage <<"'"  << endl;
                 sockServer.SendData(stringToCharArray("UNWELCOME"));
                 sockServer.CloseConnection();
                 sockServer.Listen();
 
             }else{
+                cout << "User '"<< recMessage << "' logged in successfully." << endl;
                 sockServer.SendData(stringToCharArray("WELCOME"));
 
                 while(!done){
@@ -57,7 +59,10 @@ int main(int argc, char * argv[])
                         if ( strcmp( recMessage, "QUIT")==0 ){
                             sockServer.CloseConnection();
                             sockServer.Listen();
-                            done = true;
+                            //cout << "Connection closed. Exiting the program" << endl;
+							//return 0;
+                            //done = true;
+
                         }else{
                             checkCommand(recMessage, sockServer);
                         }
@@ -107,7 +112,7 @@ void checkCommand(char* command, Socket& sockServer){
         }
     else if ( strncmp( command, "EOF OK", 6 )==0){
 
-        cout << "File Transmitted Successfully." << endl;
+        cout << "---File Transmitted Successfully---" << endl;
         sockServer.SendData(stringToCharArray("OK"));
 
         }
@@ -136,7 +141,9 @@ void getFolderContents(Socket& sockServer){
         space[0]='\t';
         space[1]='\0';
 
-        //strcat(dirList, newline);
+        //Clear out dirList
+        memset(&dirList[0], NULL, sizeof(dirList));
+
         DIR *pdir = NULL; // remember, it's good practice to initialize a pointer to NULL!
 	    pdir = opendir ("."); // "." will refer to the current directory
 	    struct dirent *pent = NULL;
@@ -220,7 +227,7 @@ void getFileReady(char *message, Socket& sockServer){
 	    closedir (pdir);
 
 	    //Check for number in Range!
-	    if(fileNum < 0 || fileNum > dirContents.size() -1){
+	    if(fileNum < 0 || fileNum > dirContents.size()){
 
           sockServer.SendData(stringToCharArray("ERROR"));
 
@@ -233,7 +240,18 @@ void getFileReady(char *message, Socket& sockServer){
             sockServer.SendFile(stringToCharArray(fileName));
             sockServer.SendData(stringToCharArray("EOFEOFEOFEOFEOFEOF"));
 	    }
+
+	    for (int i=0; i <  dirContents.size(); i++)
+            dirContents[i]=" ";
 }
+
+/********************
+* Name: stringToCharArray
+* Purpose: Converts a string in a character array to send
+via the socket.
+* Arguments: String to be converted
+* Returns: New Cstring.
+********************/
 
 char* stringToCharArray(string oldStr){
 

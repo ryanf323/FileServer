@@ -93,7 +93,7 @@ void ServerSocket::Listen()
     }
     mySocket = acceptSocket;
 
-    cout << "Accept " << endl;
+    cout << "Connection Accepted. " << endl;
 
     // *****************
     unsigned long ulAddr = clientSocket.sin_addr.s_addr;
