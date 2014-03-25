@@ -17,8 +17,8 @@ using namespace std;
 
 void getFolderContents(Socket&);
 bool checkName(string, string);
-void getFile(char*, Socket&);
-void checkMsg(char*, Socket&);
+void getFileReady(char*, Socket&);
+void checkCommand(char*, Socket&);
 char* stringToCharArray(string);
 
 int main(int argc, char * argv[])
@@ -59,7 +59,7 @@ int main(int argc, char * argv[])
                             sockServer.Listen();
                             done = true;
                         }else{
-                            checkMsg(recMessage, sockServer);
+                            checkCommand(recMessage, sockServer);
                         }
                 }
 
@@ -87,25 +87,25 @@ bool checkName(string name, string user){
 }
 
 /********************
-* Name: checkMsg
+* Name: checkCommand
 * Purpose: Parse message
 *    and execute operations
 * Arguments: message and socket ptr
 * Returns: nothing
 ********************/
-void checkMsg(char* recMessage, Socket& sockServer){
+void checkCommand(char* command, Socket& sockServer){
 
- if ( strncmp( recMessage, "LIST", 4 )==0){
+ if ( strncmp( command, "LIST", 4 )==0){
 
             getFolderContents(sockServer);
 
         }
-    else if ( strncmp( recMessage, "SEND", 4 )==0){
+    else if ( strncmp( command, "SEND", 4 )==0){
 
-            getFile(recMessage, sockServer);
+            getFileReady(command, sockServer);
 
         }
-    else if ( strncmp( recMessage, "EOF OK", 6 )==0){
+    else if ( strncmp( command, "EOF OK", 6 )==0){
 
         cout << "File Transmitted Successfully." << endl;
         sockServer.SendData(stringToCharArray("OK"));
@@ -172,14 +172,14 @@ void getFolderContents(Socket& sockServer){
             dirList[i]=NULL;
 }
 /********************
-* Name: getFile
+* Name: getFileReady
 * Purpose: fetches file name
 *  and passes it to the send
 *  method
 * Arguments: filename, socket
 * Returns: nothing
 ********************/
-void getFile(char *message, Socket& sockServer){
+void getFileReady(char *message, Socket& sockServer){
 
         //parse SEND message for file number
        string toParse(message);
@@ -193,7 +193,7 @@ void getFile(char *message, Socket& sockServer){
        }else{
            string number = toParse.substr((space+1), toParse.length()-space+1);
             fileNum = atoi(number.c_str());
-            cout << "File Number "<< fileNum << "Requested." << endl;
+            cout << "File Number "<< fileNum << " Requested." << endl;
        }
 
         DIR *pdir = NULL;

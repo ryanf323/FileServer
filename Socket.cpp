@@ -142,9 +142,12 @@ void ClientSocket::ConnectToServer( const char *ipAddress, int port )
 void Socket::ReceiveFile(char *filename)
 {
 
-	char rec[50] = "";
+		char rec[50] = "";
+	//recv( mySocket, filename, 32, 0 );
+	//New code:
+	int i = recv( mySocket, filename, 256, 0 );
+	filename[i]='\0';
 
-	recv( mySocket, filename, 32, 0 );
 	send( mySocket, "OK", strlen("OK"), 0 );
 
 	FILE *fw = fopen(filename, "wb");
